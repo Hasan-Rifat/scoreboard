@@ -12,8 +12,8 @@ const initialValue = document.querySelector(".lws-singleResult");
 
 // initialState
 const initialState = {
-  value: 120, //Math.floor(Math.random() * 120),
-  match: [],
+  value: 120,
+  match: 1,
 };
 
 // action
@@ -54,7 +54,10 @@ const matchReducer = (state = initialState, action) => {
     case DECREMENT:
       return {
         ...state,
-        value: state.value - action.payload,
+        value:
+          state.value > 0 && state.value > action.payload
+            ? state.value - action.payload
+            : 0,
       };
     case MATCH:
       return {
@@ -73,9 +76,11 @@ const store = createStore(matchReducer);
 store.subscribe(() => {
   console.log(store.getState().value);
   initialValue.innerText = store.getState().value;
+  console.log(store.getState().value);
 });
 
 // increment Form
+
 incrementForm.addEventListener("submit", (e) => {
   e.preventDefault();
   console.log(e.target.increment.value);
@@ -84,6 +89,7 @@ incrementForm.addEventListener("submit", (e) => {
 });
 
 // decrement Form
+
 decrementForm.addEventListener("submit", (e) => {
   e.preventDefault();
   console.log(e.target.decrement.value);
@@ -93,25 +99,38 @@ decrementForm.addEventListener("submit", (e) => {
 
 // match items
 addMatch.addEventListener("click", () => {
-  allMatches.innerHTML += `<div class="match">
+  const newMath = document.createElement("div");
+  newMath.classList.add("match");
+  newMath.innerHTML += `
   <div class="wrapper">
     <button class="lws-delete">
       <img src="./image/delete.svg" alt="" />
     </button>
-    <h3 class="lws-matchName">Match 1</h3>
+    <h3 class="lws-matchName">Match ${store.getState().match + 1}</h3>
   </div>
   <div class="inc-dec">
-    <form class="incrementForm">
+    <form  class="incrementForm">
       <h4>Increment</h4>
-      <input type="number" name="increment" class="lws-increment" />
+      <input type="number" name="increment" class="lws-increment-${
+        store.getState().match + 1
+      }" />
     </form>
-    <form class="decrementForm">
+    <form  class="decrementForm">
       <h4>Decrement</h4>
       <input type="number" name="decrement" class="lws-decrement" />
     </form>
   </div>
   <div class="numbers">
-    <h2 class="lws-singleResult">${store.getState().value}</h2>
-  </div>
-</div>;`;
+    <h2 class="lws-singleResult">${(store.getState().value = 0)}</h2>
+  </div>`;
+
+  allMatches.appendChild(newMath);
+
+  const matchItems = document.querySelectorAll(".match");
+  matchItems.forEach((item) => {
+    //  remove item
+    item.querySelector(".lws-delete").addEventListener("click", () => {
+      item.remove();
+    });
+  });
 });
